@@ -33,8 +33,8 @@ jobs:
       - name: Login to docker hub
         users: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_HUB_USER_NAME }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+          username: n20dccn077
+          password: n20dccn077@
 
       - name: Build and Push
         uses: docker/build-push-action@v4
@@ -42,4 +42,4 @@ jobs:
             context: .
             dockerfile: Dockerfile
             push: true
-            tags: ${{ secrets.DOCKER_HUB_USER_NAME }}/myapp:0.1.0
+            tags: n20dccn077/myapp:0.1.0

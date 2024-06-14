@@ -16,7 +16,7 @@ server:
   port: 8081
 spring:
   application:
-    name: "cafehalanddb123"
+    name: "cafehalanddb1234"
   datasource:
     url: jdbc:mysql://localhost:3306/cafehalanddb
     username: root
