@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html th:fragment="page_header(title)"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="ISO-8859-1">
+<title>Home - Cafe Haland</title>
+
+<link rel="stylesheet" type="text/css" th:href="@{/styles/style.css}">
+<link rel="stylesheet" type="text/css"
+	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+<link rel="stylesheet" type="text/css" th:href="@{/fontawesome/all.css}">
+<script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script type="text/javascript"
+	th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+</head>
+<body>
+	<div class="container-fuild">
+		<header>
+			<form name="logoutForm" th:hidden="true" method="post"
+				th:action="@{/logout}">
+				<input type="submit" value="Logout" />
+			</form>
+			<nav
+				class="navbar navbar-expand-lg navbar-dark custom-bg-color-header">
+				<a class="navbar-brand" th:href="@{/}"> <img
+					style="width: 70px;" alt="logo" th:src="@{/images/logo.png}">
+				</a>
+				<button class="navbar-toggler" type="button" data-toggle="collapse"
+					data-target="#navbarSupportedContent"
+					aria-controls="navbarSupportedContent" aria-expanded="false"
+					aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+
+				<div class="collapse navbar-collapse" id="navbarSupportedContent">
+					<ul class="navbar-nav mr-auto">
+						<li sec:authorize="hasAuthority('Admin')" class="nav-item"><a class="nav-link" href="/staffs">Staffs</a></li>
+						
+						<li sec:authorize="hasAnyAuthority('Admin', 'Editor')" class="nav-item"><a class="nav-link" href="/products">Products</a></li>
+						
+						<li sec:authorize="hasAnyAuthority('Admin', 'Editor', 'Inventory')" class="nav-item"><a class="nav-link" href="/ingredients">Ingredients</a></li>
+						
+						<li sec:authorize="hasAnyAuthority('Admin', 'Editor', 'Inventory')" class="nav-item"><a class="nav-link" href="/suppliers">Suppliers</a></li>
+						
+						<li sec:authorize="hasAnyAuthority('Admin', 'Inventory')" class="nav-item dropdown"><a
+							class="nav-link dropdown-toggle" href="#" role="button"
+							data-toggle="dropdown" aria-expanded="false">Warehouse</a>
+							<div class="dropdown-menu">
+								<a sec:authorize="hasAnyAuthority('Admin', 'Inventory')" class="dropdown-item" href="/receipts">Receipt</a>
+								<a sec:authorize="hasAnyAuthority('Admin', 'Inventory')" class="dropdown-item" href="/goodreceiveds">Good Received</a>
+							</div></li>
+					</ul>
+
+					<ul class="navbar-nav">
+						<li sec:authorize="hasAnyAuthority('Saleperson')" class="nav-item"><a class="nav-link" href="/orders">Order&nbsp;<i class="fa-solid fa-store"></i></a></li>
+						<li sec:authorize="hasAnyAuthority('Bartender')" class="nav-item"><a class="nav-link" href="/bartendings">Bartending&nbsp;<i class="fa-solid fa-utensils"></i></a></li>
+						<li class="nav-item dropdown"><a
+							class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+							role="button" data-toggle="dropdown" aria-haspopup="true"
+							aria-expanded="false"><i class="fa-solid fa-user"></i>&nbsp;<span
+								sec:authentication="principal.fullname"></span></a>
+							<div style="left: -20px;" class="dropdown-menu"
+								aria-labelledby="navbarDropdown">
+								<a class="dropdown-item" href="#"><i class="fa-solid fa-pen-to-square"></i>&nbsp;Edit Profile</a>
+								<div class="dropdown-divider"></div>
+								<a class="dropdown-item" href="javascript: logoutForm.submit();"><i class="fa-solid fa-arrow-right-from-bracket"></i>&nbsp;Logout</a>
+							</div></li>
+						</li>
+					</ul>
+				</div>
+			</nav>
+		</header>
+
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-6">
+					<h2>List Order</h2>
+					<div style="min-height: 400px">
+						<table class="table table-striped table-bordered">
+							<thead>
+								<tr>
+									<th scope="col">ID</th>
+									<th scope="col">Name</th>
+									<th scope="col">Size</th>
+									<th scope="col">Quantity</th>
+									<th scope="col">Price</th>
+									<th scope="col"></th>
+								</tr>
+							</thead>
+							<tbody id="content-order">
+
+							</tbody>
+						</table>
+					</div>
+					<div class="form-group">
+						<label for="exampleFormControlTextarea1">Note</label>
+						<textarea class="form-control" id="exampleFormControlTextarea1"
+							rows="3"></textarea>
+					</div>
+
+					<h5>
+						<strong>Total Price: </strong> <span id="totalPrice">0</span>
+					</h5>
+
+					<div class="text-center">
+						<button type="submit" onclick="save()" class="btn btn-primary">Save</button>
+						<button onclick="clearOrder()" class="btn btn btn-secondary">Cancel</button>
+					</div>
+				</div>
+				<div class="col-6">
+					<h2>List Product</h2>
+					<div class="container">
+						<div class="row">
+							<div th:each="product:${listProducts}" th:if="${product.enabled}" class="col-4 mb-1">
+								<div class="card" id="card1">
+									<img th:src="@{${product.pathImage}}" class="card-img-top"
+										alt="..." />
+									<div class="card-body">
+										<h5 class="card-title">[[${product.name}]]</h5>
+										<p class="card-text">[[${product.description}]]</p>
+										<button th:onclick="'addToOrder('+${product.id}+')'"
+											class="btn btn-primary">Add</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="dialogOrder" class="modal" tabindex="-1" role="dialog">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Notification</h5>
+						<button type="button" class="close" data-dismiss="modal"
+							aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<p>Order confirmation.</p>
+					</div>
+					<div class="modal-footer">
+						<button onclick="comfirmOder()" type="button"
+							class="btn btn-primary">Yes</button>
+						<button type="button" class="btn btn-secondary"
+							data-dismiss="modal">No</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal" id="ModalAdd" tabindex="-1">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Select Size</h5>
+						<button type="button" class="close" data-dismiss="modal"
+							aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<p>
+							<strong>Name:</strong> <span id="name-product"></span>
+						</p>
+						<p>
+							<strong>Description:</strong> <span id="des-product"></span>
+						</p>
+
+						<table class="table table-bordered">
+							<thead>
+								<tr>
+									<th scope="col">Name</th>
+									<th scope="col">Price</th>
+								</tr>
+							</thead>
+							<tbody id="table-size">
+
+							</tbody>
+						</table>
+
+						<div class="form-group">
+							<label for="size-product" style="font-weight: 700">Select
+								size</label> <select class="form-control" id="size-product">
+
+							</select>
+						</div>
+
+						<div class="form-group">
+							<label for="quantity-product">Quantity</label> <input
+								name="quantity-product" type="number" min="1"
+								class="form-control" id="quantity-product" />
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary"
+							data-dismiss="modal">Close</button>
+						<button id="addToOrder" type="button" class="btn btn-primary">Add
+							Order</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="dialogError" class="modal" tabindex="-1">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Warning Stock</h5>
+						<button type="button" class="close" data-dismiss="modal"
+							aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<p>Insufficient raw materials</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="orderSuccess" class="modal" tabindex="-1">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Notification</h5>
+						<button type="button" class="close" data-dismiss="modal"
+							aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<p>Invoice saved successfully.</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary"
+							data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id="listEmpty" class="modal" tabindex="-1">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Notification</h5>
+						<button type="button" class="close" data-dismiss="modal"
+							aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<p>Empty order list.</p>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary"
+							data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<footer id="footer" class="text-center m-1 py-3">
+			<p>Cafe Haland Control Panel - Copyright &copy; TDM</p>
+		</footer>
+	</div>
+
+	<script type="text/javascript" th:src="@{/js/orders.js}"></script>
+</body>
+</html>

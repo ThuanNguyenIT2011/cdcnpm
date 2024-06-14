@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="ISO-8859-1">
+<title>Home - Cafe Haland</title>
+
+<link rel="stylesheet" type="text/css" th:href="@{/styles/style.css}">
+<link rel="stylesheet" type="text/css"
+	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+<link rel="stylesheet" type="text/css" th:href="@{/fontawesome/all.css}">
+<script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script type="text/javascript"
+	th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+</head>
+<body>
+	<div class="container-fuild">
+		<header>
+			<form name="logoutForm" th:hidden="true" method="post"
+				th:action="@{/logout}">
+				<input type="submit" value="Logout" />
+			</form>
+			<nav
+				class="navbar navbar-expand-lg navbar-dark custom-bg-color-header">
+				<a class="navbar-brand" th:href="@{/}"> <img
+					style="width: 70px;" alt="logo" th:src="@{/images/logo.png}">
+				</a>
+				<button class="navbar-toggler" type="button" data-toggle="collapse"
+					data-target="#navbarSupportedContent"
+					aria-controls="navbarSupportedContent" aria-expanded="false"
+					aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+
+				<div class="collapse navbar-collapse" id="navbarSupportedContent">
+					<ul class="navbar-nav mr-auto">
+						<li sec:authorize="hasAuthority('Admin')" class="nav-item"><a class="nav-link" href="/staffs">Staffs</a></li>
+						
+						<li sec:authorize="hasAnyAuthority('Admin', 'Editor')" class="nav-item"><a class="nav-link" href="/products">Products</a></li>
+						
+						<li sec:authorize="hasAnyAuthority('Admin', 'Editor', 'Inventory')" class="nav-item"><a class="nav-link" href="/ingredients">Ingredients</a></li>
+						
+						<li sec:authorize="hasAnyAuthority('Admin', 'Editor', 'Inventory')" class="nav-item"><a class="nav-link" href="/suppliers">Suppliers</a></li>
+						
+						<li sec:authorize="hasAnyAuthority('Admin', 'Inventory')" class="nav-item dropdown"><a
+							class="nav-link dropdown-toggle" href="#" role="button"
+							data-toggle="dropdown" aria-expanded="false">Warehouse</a>
+							<div class="dropdown-menu">
+								<a sec:authorize="hasAnyAuthority('Admin', 'Inventory')" class="dropdown-item" href="/receipts">Receipt</a>
+								<a sec:authorize="hasAnyAuthority('Admin', 'Inventory')" class="dropdown-item" href="/goodreceiveds">Good Received</a>
+							</div></li>
+					</ul>
+
+					<ul class="navbar-nav">
+						<li sec:authorize="hasAnyAuthority('Saleperson')" class="nav-item"><a class="nav-link" href="/orders">Order&nbsp;<i class="fa-solid fa-store"></i></a></li>
+						<li sec:authorize="hasAnyAuthority('Bartender')" class="nav-item"><a class="nav-link" href="/bartendings">Bartending&nbsp;<i class="fa-solid fa-utensils"></i></a></li>
+						<li class="nav-item dropdown"><a
+							class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+							role="button" data-toggle="dropdown" aria-haspopup="true"
+							aria-expanded="false"><i class="fa-solid fa-user"></i>&nbsp;<span
+								sec:authentication="principal.fullname"></span></a>
+							<div style="left: -20px;" class="dropdown-menu"
+								aria-labelledby="navbarDropdown">
+								<a class="dropdown-item" href="#"><i class="fa-solid fa-pen-to-square"></i>&nbsp;Edit Profile</a>
+								<div class="dropdown-divider"></div>
+								<a class="dropdown-item" href="javascript: logoutForm.submit();"><i class="fa-solid fa-arrow-right-from-bracket"></i>&nbsp;Logout</a>
+							</div></li>
+						</li>
+					</ul>
+				</div>
+			</nav>
+		</header>
+
+
+		<div class="container-fluid">
+			<div class="bread-crumb">
+				<div>
+					<div style="text-decoration: none;">
+						<h4 style="color: #b5313a;">Manage Ingredients - Control
+							Panel</h4>
+					</div>
+				</div>
+			</div>
+			<a sec:authorize="hasAnyAuthority('Admin', 'Editor')" th:href="@{/ingredients/new}" style="font-size: 25px;"><i
+				class="fa-solid fa-plus icon-gray"></i></a>
+		</div>
+
+		<div class="container-fluid">
+			<form th:action="@{/ingredients}" id="formFilter">
+				<div class="form-row align-items-center">
+					<div class="col-auto" id="formFilter--content">
+						<label class="sr-only" for="inlineFormInputGroup">Keyword</label>
+						<div class="input-group">
+							<input name="keyword" th:value="${keyword}" type="search"
+								class="form-control" id="inlineFormInputGroup"
+								placeholder="Keyword"> <input type="hidden"
+								name="sortDir" th:value="${sortDir}">
+
+							<button type="submit" class="btn btn-primary mb-2">
+								<i class="fa-solid fa-magnifying-glass"></i>
+							</button>
+
+							<button class="btn btn-secondary mb-2" onclick="resetForm()"
+								value="Clear">
+								<i class="fa-solid fa-eraser"></i>
+							</button>
+						</div>
+					</div>
+
+				</div>
+			</form>
+		</div>
+
+		<div th:if="${message != null}"
+			class="alert alert-success text-center" th:text="${message}"></div>
+
+		<div class="container-fluid">
+			<div>
+				<table class="table table-striped table-hover table-bordered">
+					<thead class="thead-dark">
+						<tr>
+							<th scope="col"><a class="custom-a" href="#">ID</a></th>
+							<th scope="col"><a class="custom-a"
+								th:href="@{'/ingredients?sortField=name&sortDir='+${reverseSort}+'&keyword='+${keyword==null?'':keyword}}">Name
+									<i
+									th:class="${reverseSort=='desc'?'fa-solid fa-sort-up':'fa-solid fa-sort-down'}"></i>
+							</a></th>
+							<th>Stock</th>
+							<th>Unit</th>
+							<th sec:authorize="hasAnyAuthority('Admin', 'Editor')"></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="ingredent : ${listIngredients}">
+							<td>[[${ingredent.id}]]</td>
+							<td>[[${ingredent.name}]]</td>
+							<td>[[${ingredent.stock}]]</td>
+							<td>[[${ingredent.unit}]]</td>
+
+							<td sec:authorize="hasAnyAuthority('Admin', 'Editor')" class="text-center">
+								<div class="d-flex process">
+									<a th:href="@{'/ingredients/edit/'+${ingredent.id}}"
+										title="update" class=""><i
+										class="fa-solid fa-pen-to-square icon-gray"></i></a> &nbsp; <a
+										th:href="@{'/ingredients/delete/'+${ingredent.id}}"
+										title="delete" class="link-delete"
+										th:lastNameUser="${ingredent.name}"
+										th:userId="${ingredent.id}"><i
+										class="fa-solid fa-trash icon-gray"></i></a>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="modal fade" id="comfirmModal" tabindex="-1" role="dialog">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="modalTitle">Delete Comfirmation</h5>
+							<button type="button" class="close" data-dismiss="modal"
+								aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<p id="contentComfirmModal"></p>
+						</div>
+						<div class="modal-footer">
+							<a href="" class="btn btn-success" id="yesButton">Yes</a>
+
+							<button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<footer id="footer" class="text-center m-1 py-3">
+				<p>Cafe Haland Control Panel - Copyright &copy; TDM</p>
+			</footer>
+		</div>
+
+		<script type="text/javascript">
+			function resetForm() {
+				window.location = '[[@{/ingredients}]]';
+			}
+
+			$(document).ready(
+					function() {
+						$(".link-delete").on(
+								"click",
+								function(e) {
+									e.preventDefault();
+									link = $(this);
+
+									userId = link.attr("userId");
+									lastNameUser = link.attr("lastNameUser");
+
+									$("#yesButton").attr("href",
+											link.attr("href"));
+
+									$("#contentComfirmModal").text(
+											"Are you sure you want to delete this ingredent "
+													+ userId + ": "
+													+ lastNameUser + "?");
+									$("#comfirmModal").modal();
+								});
+					});
+		</script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html th:fragment="page_header(title)"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="ISO-8859-1">
+<title>Home - Cafe Haland</title>
+
+<link rel="stylesheet" type="text/css" th:href="@{/styles/style.css}">
+<link rel="stylesheet" type="text/css"
+	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+<link rel="stylesheet" type="text/css" th:href="@{/fontawesome/all.css}">
+<script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script type="text/javascript"
+	th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+
+
+</head>
+<body>
+	<div class="container-fuild">
+		<header>
+			<form name="logoutForm" th:hidden="true" method="post"
+				th:action="@{/logout}">
+				<input type="submit" value="Logout" />
+			</form>
+			<nav
+				class="navbar navbar-expand-lg navbar-dark custom-bg-color-header">
+				<a class="navbar-brand" th:href="@{/}"> <img
+					style="width: 70px;" alt="logo" th:src="@{/images/logo.png}">
+				</a>
+				<button class="navbar-toggler" type="button" data-toggle="collapse"
+					data-target="#navbarSupportedContent"
+					aria-controls="navbarSupportedContent" aria-expanded="false"
+					aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+
+				<div class="collapse navbar-collapse" id="navbarSupportedContent">
+					<ul class="navbar-nav mr-auto">
+						<li sec:authorize="hasAuthority('Admin')" class="nav-item"><a
+							class="nav-link" href="/staffs">Staffs</a></li>
+
+						<li sec:authorize="hasAnyAuthority('Admin', 'Editor')"
+							class="nav-item"><a class="nav-link" href="/products">Products</a></li>
+
+						<li
+							sec:authorize="hasAnyAuthority('Admin', 'Editor', 'Inventory')"
+							class="nav-item"><a class="nav-link" href="/ingredients">Ingredients</a></li>
+
+						<li
+							sec:authorize="hasAnyAuthority('Admin', 'Editor', 'Inventory')"
+							class="nav-item"><a class="nav-link" href="/suppliers">Suppliers</a></li>
+
+						<li sec:authorize="hasAnyAuthority('Admin', 'Inventory')"
+							class="nav-item dropdown"><a
+							class="nav-link dropdown-toggle" href="#" role="button"
+							data-toggle="dropdown" aria-expanded="false">Warehouse</a>
+							<div class="dropdown-menu">
+								<a sec:authorize="hasAnyAuthority('Admin', 'Inventory')"
+									class="dropdown-item" href="/receipts">Receipt</a> <a
+									sec:authorize="hasAnyAuthority('Admin', 'Inventory')"
+									class="dropdown-item" href="/goodreceiveds">Good Received</a>
+							</div></li>
+					</ul>
+
+					<ul class="navbar-nav">
+						<li sec:authorize="hasAnyAuthority('Saleperson')" class="nav-item"><a
+							class="nav-link" href="/orders">Order&nbsp;<i
+								class="fa-solid fa-store"></i></a></li>
+						<li sec:authorize="hasAnyAuthority('Bartender')" class="nav-item"><a
+							class="nav-link" href="/bartendings">Bartending&nbsp;<i
+								class="fa-solid fa-utensils"></i></a></li>
+						<li class="nav-item dropdown"><a
+							class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+							role="button" data-toggle="dropdown" aria-haspopup="true"
+							aria-expanded="false"><i class="fa-solid fa-user"></i>&nbsp;<span
+								sec:authentication="principal.fullname"></span></a>
+							<div style="left: -20px;" class="dropdown-menu"
+								aria-labelledby="navbarDropdown">
+								<a class="dropdown-item" href="#"><i
+									class="fa-solid fa-pen-to-square"></i>&nbsp;Edit Profile</a>
+								<div class="dropdown-divider"></div>
+								<a class="dropdown-item" href="javascript: logoutForm.submit();"><i
+									class="fa-solid fa-arrow-right-from-bracket"></i>&nbsp;Logout</a>
+							</div></li>
+						</li>
+					</ul>
+				</div>
+			</nav>
+		</header>
+
+
+		<div class="container-fluid">
+			<h2>Cafe Haland Control Panel</h2>
+			<p>
+				Welcome <strong sec:authentication="principal.fullname"></strong> <small
+					sec:authentication="principal.authorities"></small>
+			</p>
+		</div>
+
+		<div sec:authorize="hasAuthority('Admin')" class="container-fluid">
+			<div class="row">
+				<div class="col-3">
+					<div class="row card-statistics">
+						<div>
+							<i class="fa-solid fa-cart-shopping"></i>
+						</div>
+						<div>
+							<p id="dailySales"></p>
+							<p>Daily Sales</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-3">
+					<div class="row card-statistics">
+						<div>
+							<i class="fa-solid fa-mug-saucer"></i>
+						</div>
+						<div>
+							<p id="totalProduct">100</p>
+							<p>Total number of products</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-3">
+					<div class="row card-statistics">
+						<div>
+							<i class="fa-solid fa-user"></i></i>
+						</div>
+						<div>
+							<p id="totalStaff">100</p>
+							<p>Staff</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-3">
+					<div class="row card-statistics">
+						<div>
+							<i class="fa-solid fa-bell"></i>
+						</div>
+						<div>
+							<p style="font-size: 16px" id="notify"></p>
+							<p>Notify</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div sec:authorize="hasAuthority('Admin')" style="width: 700px" class="chartCard">
+			<div class="chartBox">
+				<canvas id="myChart"></canvas>
+			</div>
+		</div>
+
+
+		<footer id="footer" class="text-center m-1 py-3">
+			<p>Cafe Haland Control Panel - Copyright &copy; TDM</p>
+		</footer>
+	</div>
+
+	<script
+		th:src="@{https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.2.1/chart.min.js}"
+		integrity="sha512-v3ygConQmvH0QehvQa6gSvTE2VdBZ6wkLOlmK7Mcy2mZ0ZF9saNbbk19QeaoTHdWIEiTlWmrwAL4hS8ElnGFbA=="
+		crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+	<script th:src="@{https://cdn.jsdelivr.net/npm/chart.js}"></script>
+	<script type="text/javascript" th:src="@{/js/statistics.js}"></script>
+</body>
+</html>

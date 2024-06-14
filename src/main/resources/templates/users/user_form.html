@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html th:fragment="page_header(title)"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="ISO-8859-1">
+<title>[[${titlePage}]] - Cafe Haland</title>
+
+<link rel="stylesheet" type="text/css" th:href="@{/styles/style.css}">
+<link rel="stylesheet" type="text/css"
+	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+<link rel="stylesheet" type="text/css" th:href="@{/fontawesome/all.css}">
+<script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}"></script>
+<script type="text/javascript"
+	th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+</head>
+<body>
+	<div class="container-fuild">
+		<header>
+			<form name="logoutForm" th:hidden="true" method="post"
+				th:action="@{/logout}">
+				<input type="submit" value="Logout" />
+			</form>
+			<nav
+				class="navbar navbar-expand-lg navbar-dark custom-bg-color-header">
+				<a class="navbar-brand" th:href="@{/}"> <img
+					style="width: 70px;" alt="logo" th:src="@{/images/logo.png}">
+				</a>
+				<button class="navbar-toggler" type="button" data-toggle="collapse"
+					data-target="#navbarSupportedContent"
+					aria-controls="navbarSupportedContent" aria-expanded="false"
+					aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+
+				<div class="collapse navbar-collapse" id="navbarSupportedContent">
+					<ul class="navbar-nav mr-auto">
+						<li sec:authorize="hasAuthority('Admin')" class="nav-item"><a class="nav-link" href="/staffs">Staffs</a></li>
+						
+						<li sec:authorize="hasAnyAuthority('Admin', 'Editor')" class="nav-item"><a class="nav-link" href="/products">Products</a></li>
+						
+						<li sec:authorize="hasAnyAuthority('Admin', 'Editor', 'Inventory')" class="nav-item"><a class="nav-link" href="/ingredients">Ingredients</a></li>
+						
+						<li sec:authorize="hasAnyAuthority('Admin', 'Editor', 'Inventory')" class="nav-item"><a class="nav-link" href="/suppliers">Suppliers</a></li>
+						
+						<li sec:authorize="hasAnyAuthority('Admin', 'Inventory')" class="nav-item dropdown"><a
+							class="nav-link dropdown-toggle" href="#" role="button"
+							data-toggle="dropdown" aria-expanded="false">Warehouse</a>
+							<div class="dropdown-menu">
+								<a sec:authorize="hasAnyAuthority('Admin', 'Inventory')" class="dropdown-item" href="/receipts">Receipt</a>
+								<a sec:authorize="hasAnyAuthority('Admin', 'Inventory')" class="dropdown-item" href="/goodreceiveds">Good Received</a>
+							</div></li>
+					</ul>
+
+					<ul class="navbar-nav">
+						<li sec:authorize="hasAnyAuthority('Saleperson')" class="nav-item"><a class="nav-link" href="/orders">Order&nbsp;<i class="fa-solid fa-store"></i></a></li>
+						<li sec:authorize="hasAnyAuthority('Bartender')" class="nav-item"><a class="nav-link" href="/bartendings">Bartending&nbsp;<i class="fa-solid fa-utensils"></i></a></li>
+						<li class="nav-item dropdown"><a
+							class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+							role="button" data-toggle="dropdown" aria-haspopup="true"
+							aria-expanded="false"><i class="fa-solid fa-user"></i>&nbsp;<span
+								sec:authentication="principal.fullname"></span></a>
+							<div style="left: -20px;" class="dropdown-menu"
+								aria-labelledby="navbarDropdown">
+								<a class="dropdown-item" href="#"><i class="fa-solid fa-pen-to-square"></i>&nbsp;Edit Profile</a>
+								<div class="dropdown-divider"></div>
+								<a class="dropdown-item" href="javascript: logoutForm.submit();"><i class="fa-solid fa-arrow-right-from-bracket"></i>&nbsp;Logout</a>
+							</div></li>
+						</li>
+					</ul>
+				</div>
+			</nav>
+		</header>
+
+		<div class="bread-crumb">
+			<div class="container">
+				<div style="text-decoration: none;">
+					<p>Cafe Haland Control Panel &nbsp;&nbsp;/</p>
+					<p style="color: #b5313a;">&nbsp;&nbsp;[[${titlePage}]]</p>
+				</div>
+			</div>
+		</div>
+
+
+		<div>
+			<form th:action="@{/staffs/save}" id="form-adduser"
+				onsubmit="return checkEmailUnique(this);" method="post"
+				th:object="${user}" class="container rounded p-3"
+				style="max-width: 700px;" enctype="multipart/form-data">
+
+				<input type="hidden" th:field="*{id}">
+				<div class="form-group row">
+					<label for="email" class="col-sm-4 col-form-label">Email</label>
+					<div class="col-sm-8">
+						<input th:field="*{account.email}" type="email" th:sid="email"
+							class="form-control" required="required" minlength="8"
+							maxlength="128">
+					</div>
+				</div>
+
+				<div class="form-group row">
+					<label for="firstName" class="col-sm-4 col-form-label">First
+						Name</label>
+					<div class="col-sm-8">
+						<input th:field="*{firstName}" type="text" class="form-control"
+							required="required" minlength="2" maxlength="45">
+					</div>
+				</div>
+
+				<div class="form-group row">
+					<label for="lastName" class="col-sm-4 col-form-label">Last
+						Name</label>
+					<div class="col-sm-8">
+						<input th:field="*{lastName}" type="text" class="form-control"
+							required="required" minlength="2" maxlength="45">
+					</div>
+				</div>
+
+				<div class="form-group row">
+					<label for="password" class="col-sm-4 col-form-label">Password</label>
+					<div class="col-sm-8">
+						<input th:if="*{id == null}" th:field="*{account.password}"
+							type="password" class="form-control" required="required"
+							minlength="6" maxlength="128"> <input
+							th:unless="*{id == null}" th:field="*{account.password}"
+							type="password" class="form-control">
+					</div>
+				</div>
+
+				<div class="form-group row">
+					<label for="roles" class="col-sm-4 col-form-label">Roles</label>
+					<div class="col-sm-8">
+						<div th:each="role : ${listRoles}" class="form-check">
+							<input th:field="*{account.roles}" class="form-check-input"
+								type="checkbox" th:value="${role.id}" th:id="${role.id}">
+							<label class="form-check-label" th:for="${role.id}">
+								[[${role.name}]]- <small>[[${role.description}]]</small>
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group row align-items-center">
+					<label for="roles" class="col-sm-4 col-form-label">Enabled</label>
+					<div class="col-sm-8">
+						<div class="form-check">
+							<input th:field="*{account.enabled}"
+								class="form-check-input position-static" type="checkbox">
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group row align-items-center">
+					<label for="photo" class="col-sm-4 col-form-label">Photos</label>
+					<div
+						class="col-sm-8 row align-items-center justify-content-between">
+						<div class="form-check">
+							<input type="hidden" th:field="*{photos}"> <input
+								type="file" class="form-control-file" name="image"
+								id="fileImage">
+						</div>
+						<img alt="" style="width: 100px;" id="thumbnail"
+							accept="image/png, image/jpeg" class="img-fluid simg-thumbnail"
+							th:src="@{${user.getPathPhotos()}}" />
+					</div>
+				</div>
+
+				<div class="text-center">
+					<input type="submit" class="btn btn-primary m-3" value="Save">
+					<input type="button" class="btn btn-secondary" value="Cancels"
+						id="buttonCancel">
+				</div>
+			</form>
+		</div>
+
+		<footer class="text-center m-1">
+			<p>Cafe Haland Control Panel - Copyright &copy; TDM</p>
+		</footer>
+	</div>
+
+	<div class="modal fade" id="modalDialog" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="modalTitle"></h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p id="contentModelWarning"></p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		moduleUrl = '[[@{/staffs}]]';
+
+		function checkEmailUnique(form) {
+			url = "[[@{/staffs/check_email}]]";
+
+			email = $("input[name='account.email']").val();
+			idUser = $("#id").val();
+			csrf = $("input[name='_csrf']").val();
+			params = {
+				email : email,
+				idUser : idUser,
+				_csrf : csrf,
+			};
+
+			$.post(
+					url,
+					params,
+					function(response) {
+						if (response == "OK") {
+							form.submit();
+							return true;
+						} else if (response == "Duplicated") {
+							//alert("There is another user having the email " + email);
+							message = "There is another user having the email "
+									+ email;
+							showModalDialog("Warning", message);
+						} else {
+							showModalDialog("Error",
+									"Unknown reponse from server");
+						}
+					}).fail(function() {
+				showModalDialog("Error", "Could not connect to the server");
+				//alert("error")
+				return false;
+			});
+
+			return false;
+		}
+
+		function showModalDialog(title, message) {
+			$("#contentModelWarning").text(message);
+			$("#modalTitle").text(title);
+			$("#modalDialog").modal();
+		}
+	</script>
+	<script type="text/javascript" th:src="@{/js/common_form.js}"></script>
+</body>
+</html>
